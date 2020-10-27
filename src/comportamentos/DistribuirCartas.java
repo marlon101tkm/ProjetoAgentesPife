@@ -17,6 +17,7 @@ import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
 import jade.util.leap.ArrayList;
 import java.util.Deque;
+import java.util.LinkedList;
 import objetos.Carta;
 
 /**
@@ -25,34 +26,45 @@ import objetos.Carta;
  */
 public class DistribuirCartas extends Behaviour {
 
-    Deque<Jogador> listJog;
-    Deque<Carta> baralho;
+    LinkedList<Carta> baralho;
     boolean distribuiu = false;
 
-    public DistribuirCartas(Deque<Jogador> listJog, Deque<Carta> baralho, Agent a) {
-        super(a);
-        this.listJog = listJog;
+    public DistribuirCartas(LinkedList<Carta> baralho, Agent a) {
+        super(a); 
         this.baralho = baralho;
     }
 
     @Override
     public void action() {
-        int i = 39;
-        while (i > 0) {
+       
+        try {
+            int i = 39;
+            ServiceDescription servico = new ServiceDescription();
+            servico.setType("recebe_carta");
+            DFAgentDescription dfd = new DFAgentDescription();
+            dfd.addServices(servico);
+            DFAgentDescription[] resultado = DFService.search(myAgent, dfd);
+//            System.out.println(resultado.length);
+            while (i > 0) {
+                
+                for (DFAgentDescription jogador : resultado) {
+                  
+                    ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+                    msg.addReceiver(jogador.getName());
+                    System.out.println("Carta enviada: Jogador:"+jogador.getName() +" Naipe:"+baralho.peek().getNaipe() +" Numero: "+baralho.peek().getValor());
+                    msg.setContentObject(baralho.pop());
+                    myAgent.send(msg);
+                    i--;
+                }
 
-            for (Jogador jogador : listJog) {
-                ServiceDescription servico = new ServiceDescription();
-                servico.setOwnership(jogador.getLocalName());
-                servico.setType("recebe_cartas");
-                busca(servico, baralho.pop());
-                i--;
             }
 
+            distribuiu = true;
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        
-        distribuiu = true;
     }
-
+    
     @Override
     public boolean done() {
         return distribuiu;

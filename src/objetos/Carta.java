@@ -3,16 +3,6 @@ package objetos;
 
 import jade.util.leap.Serializable;
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/**
- *
- * @author Win10
- */
 public class Carta implements Serializable{
     int valor , naipe;
 
@@ -21,9 +11,30 @@ public class Carta implements Serializable{
         this.naipe = naipe;
     }
 
-    public Carta() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    @Override
+    public String toString() {
+        return "Carta{" + "valor=" + valor + ", naipe=" + naipe + '}';
     }
+    
+
+    public int getValor() {
+        return valor;
+    }
+
+    public void setValor(int valor) {
+        this.valor = valor;
+    }
+
+    public int getNaipe() {
+        return naipe;
+    }
+
+    public void setNaipe(int naipe) {
+        this.naipe = naipe;
+    }
+    
+    
+    
     
     
 }
