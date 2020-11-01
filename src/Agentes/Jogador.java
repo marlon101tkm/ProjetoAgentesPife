@@ -180,6 +180,7 @@ public class Jogador extends Agent {
 
             }
         }
+        
         mao.addAll(trinca);
         mao.addAll(dupla);
     }
@@ -239,8 +240,11 @@ public class Jogador extends Agent {
                     if (msg != null) {
                         ACLMessage reply = msg.createReply();
                         Carta card = (Carta) msg.getContentObject();
+//                        System.out.println(myAgent.getAID().getLocalName());
+                        System.out.println(myAgent.getAID().getLocalName() +" Carta Recebida " + card.toString());
                         mao.add(card);
                         checaTrincas();
+//                        System.out.println(myAgent.getAID().getLocalName()+" Qtd trincas: "+qtdTrinca);
                         //checa quantidade de trincas
                         if (qtdTrinca >= 3) {
                             //manda solicitação de vitoria
@@ -261,6 +265,7 @@ public class Jogador extends Agent {
                             reply.setPerformative(ACLMessage.INFORM);
                             reply.setProtocol("faz_jogada");
                             card = mao.remove(cartamenosImp());
+                            System.out.println(myAgent.getAID().getLocalName()+" Carta enviada" + card.toString());
                             card.setEmDupla(false);
                             card.setEmTrinca(false);
                             reply.setContentObject(card);
@@ -279,8 +284,6 @@ public class Jogador extends Agent {
 
             @Override
             public boolean done() {
-//                S
-
                 return jogoTerminou;
             }
 

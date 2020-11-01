@@ -206,10 +206,10 @@ public class Juiz extends Agent {
                     msg = new ACLMessage(ACLMessage.INFORM);
                     //na primeria rodada pega primeiro do baralho
                     if (primeiraRodada) {
-                        System.out.println(nomesJog[i]);
+//                        System.out.println(nomesJog[i]);
                         msg.addReceiver(new AID(nomesJog[i], AID.ISLOCALNAME));
                         cartaEnviada = (Carta) baralho.pop();
-                        System.out.println("Primeira carta enviada" + cartaEnviada.toString());
+                        System.out.println("Primeira carta enviada" + cartaEnviada.toString()+" para jogador: "+ nomesJog[i]);
                         msg.setContentObject(cartaEnviada);
                         myAgent.send(msg);
 
@@ -222,7 +222,7 @@ public class Juiz extends Agent {
                             if (msg.getProtocol().equalsIgnoreCase("faz_jogada")) {
 
                                 cartaRecebida = (Carta) msg.getContentObject();
-                                System.out.println("Primeira carta Recebida" + cartaRecebida.toString());
+                                System.out.println("Primeira carta Recebida" + cartaRecebida.toString()+" do jogador: "+ nomesJog[i]);
                                 descarte.push(cartaRecebida);
                                 primeiraRodada = false;
                             } else if (msg.getProtocol().equalsIgnoreCase("pede_vitoria")) {
@@ -244,10 +244,10 @@ public class Juiz extends Agent {
                         i++;
                     } else {
                         //nas jogadas subsequentes pega primeiro da pilha de descarte
-                        System.out.println(nomesJog[i]);
+//                        System.out.println(nomesJog[i]);
                         msg.addReceiver(new AID(nomesJog[i], AID.ISLOCALNAME));
                         cartaEnviada = (Carta) descarte.pop();
-                        System.out.println(" Carta Enviada descarte:" + cartaEnviada.toString());
+                        System.out.println(" Carta Enviada descarte:" + cartaEnviada.toString()+" para jogador: "+ nomesJog[i]);
                         msg.setContentObject(cartaEnviada);
                         myAgent.send(msg);
                         msg = blockingReceive();
@@ -257,13 +257,13 @@ public class Juiz extends Agent {
 //                            System.out.println(msg.getProtocol());
                             if (msg.getProtocol().equalsIgnoreCase("faz_jogada")) {
                                 cartaRecebida = (Carta) msg.getContentObject();
-                                System.out.println(" Carta Recebida descarte:" + cartaRecebida.toString());
+                                System.out.println(" Carta Recebida descarte:" + cartaRecebida.toString()+" do jogador: "+ nomesJog[i]);
                                 //se a carta recebida for iqual enviada então envia  uma carta do baralho
-                                if (cartaEnviada.equals(cartaEnviada)) {
+                                if (cartaRecebida.equals(cartaEnviada)) {
                                     descarte.push(cartaRecebida);
                                     msg.addReceiver(new AID(nomesJog[i], AID.ISLOCALNAME));
                                     cartaEnviada = (Carta) baralho.pop();
-                                    System.out.println(" Carta Enviada baralho:" + cartaEnviada.toString());
+                                    System.out.println(" Carta Enviada baralho:" + cartaEnviada.toString()+" para jogador: "+ nomesJog[i]);
                                     msg.setContentObject(cartaEnviada);
                                     myAgent.send(msg);
                                     msg = blockingReceive();
@@ -271,7 +271,7 @@ public class Juiz extends Agent {
                                         reply = msg.createReply();
                                         if (reply.getProtocol().equalsIgnoreCase("faz_jogada")) {
                                             cartaRecebida = (Carta) msg.getContentObject();
-                                            System.out.println(" Carta Recebida baralho:" + cartaRecebida.toString());
+                                            System.out.println(" Carta Recebida baralho:" + cartaRecebida.toString()+" do jogador: "+ nomesJog[i]);
                                             descarte.push(cartaRecebida);
 //                                            ele repete esse codigo  ali embaixo pq ele precisa checar a vitoria a cada envio de cartas
 
