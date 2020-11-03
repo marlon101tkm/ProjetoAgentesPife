@@ -4,8 +4,8 @@ package objetos;
 import jade.util.leap.Serializable;
 
 public class Carta implements Serializable,Comparable<Carta> {
-    int valor , naipe;
-    boolean emDupla = false , emTrinca = false;
+   public int valor , naipe;
+   public boolean emDupla = false , emTrinca = false;
 
     public boolean isEmDupla() {
         return emDupla;

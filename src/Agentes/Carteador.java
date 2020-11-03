@@ -48,6 +48,10 @@ public class Carteador extends Agent {
                 baralho.add(new Carta(j, i));
             }
         }
+//        for (Carta carta : baralho) {
+//            System.out.println(carta.toString());
+//        }
+          
         Collections.shuffle(baralho);
     }
 

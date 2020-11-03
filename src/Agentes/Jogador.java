@@ -24,8 +24,9 @@ import objetos.Carta;
 public class Jogador extends Agent {
 
     boolean ativo = false;
-    protected LinkedList<Carta> mao = new LinkedList<Carta>();
+    protected LinkedList<Carta> mao = new LinkedList<>();
     int qtdTrinca = 0;
+    String vencedor = "";
     boolean jogoTerminou = false;
 
     protected int cartamenosImp() {
@@ -47,144 +48,351 @@ public class Jogador extends Agent {
         return mao.indexOf(descartar);
     }
 
-    protected int checaNipeIqual(Carta c1, Carta c2) {
+    public void checaTrincas() {
+        int qtdEmtrinca = 0;
+        checaSequencia();
+        checaValorIgual();
         for (Carta carta : mao) {
-            if (carta.getNaipe() == c1.getNaipe()) {
-                if (carta.getValor() == c2.getValor() + 1) {
-
-                    return mao.indexOf(carta);
-
-                } else if (carta.getValor() == c1.getValor() - 1) {
-                    return mao.indexOf(carta);
-                }
+            if (carta.emTrinca) {
+                qtdEmtrinca++;
             }
         }
-
-        return -1;
-    }
-
-    protected int checaValIqual(Carta c1, Carta c2) {
-        for (Carta carta : mao) {
-            if (carta.getValor() == c1.getValor()) {
-                if (carta.getNaipe() != c1.getNaipe() && carta.getNaipe() != c2.getNaipe()) {
-                    return mao.indexOf(carta);
-                }
-            }
+        if (qtdEmtrinca >= 3) {
+            qtdTrinca += qtdEmtrinca / 3;
         }
 
-        return -1;
     }
 
-    protected void checaTrincas() {
-        Collections.sort(mao);
-        LinkedList<Carta> dupla = new LinkedList<Carta>();
-        LinkedList<Carta> trinca = new LinkedList<Carta>();
-        LinkedList<Carta> neutro = new LinkedList<Carta>();
-        int i = 0;
-        Carta primeria, proxima;
-        while (mao.size() == 0) {
-            primeria = mao.removeFirst();
-            for (Carta carta : mao) {
-                if (primeria.getNaipe() == carta.getNaipe()) {
-                    if (primeria.getValor() + 1 == carta.getValor()) {
-                        proxima = mao.remove(mao.indexOf(carta));
-                        i = checaNipeIqual(primeria, proxima);
-                        if (i < -1) {
-                            Carta interna = mao.remove(i);
-                            primeria.setEmDupla(true);
-                            proxima.setEmDupla(true);
-                            interna.setEmDupla(true);
-                            primeria.setEmTrinca(true);
-                            proxima.setEmTrinca(true);
-                            interna.setEmTrinca(true);
-                            trinca.add(primeria);
-                            trinca.add(proxima);
-                            trinca.add(interna);
-                            System.out.println(this.getAID().getLocalName() + "Trinca: ");
-                            System.out.println(primeria.toString());
-                            System.out.println(proxima.toString());
-                            System.out.println(interna.toString());
+    public void checaSequencia() {
+        LinkedList<Carta> espadas = new LinkedList<Carta>();
+        LinkedList<Carta> paus = new LinkedList<Carta>();
+        LinkedList<Carta> ouro = new LinkedList<Carta>();
+        LinkedList<Carta> copas = new LinkedList<Carta>();
 
-                            qtdTrinca++;
-                        } else {
-                            primeria.setEmDupla(true);
-                            proxima.setEmDupla(true);
-                            dupla.add(primeria);
-                            dupla.add(proxima);
-                            System.out.println(this.getAID().getLocalName() + "Dupla: ");
-                            System.out.println(primeria.toString());
-                            System.out.println(proxima.toString());
-                        }
+        for (Carta c : mao) {
+            switch (c.getNaipe()) {
+                case 1:
+                    espadas.add(c);
+                    break;
+                case 2:
+                    paus.add(c);
+                    break;
+                case 3:
+                    ouro.add(c);
+                    break;
+                default:
+                    copas.add(c);
+                    break;
+            }
 
-                    } else if (primeria.getValor() - 1 == carta.getValor()) {
-                        proxima = mao.remove(mao.indexOf(carta));
-                        i = checaNipeIqual(primeria, proxima);
-                        if (i < -1) {
-                            Carta interna = mao.remove(i);
-                            primeria.setEmDupla(true);
-                            proxima.setEmDupla(true);
-                            interna.setEmDupla(true);
-                            primeria.setEmTrinca(true);
-                            proxima.setEmTrinca(true);
-                            interna.setEmTrinca(true);
-                            trinca.add(primeria);
-                            trinca.add(proxima);
-                            trinca.add(interna);
-                            System.out.println(this.getAID().getLocalName() + "Trinca: ");
-                            System.out.println(primeria.toString());
-                            System.out.println(proxima.toString());
-                            System.out.println(interna.toString());
-                            qtdTrinca++;
+//            if (c.getNaipe() == 1) {
+//                espadas.add(c);
+//            } else if (c.getNaipe() == 2) {
+//                paus.add(c);
+//            } else if (c.getNaipe() == 3) {
+//                ouro.add(c);
+//            } else {
+//                copas.add(c);
+//            }
+        }
+
+        Collections.sort(espadas);
+        Collections.sort(paus);
+        Collections.sort(ouro);
+        Collections.sort(copas);
+
+        if (espadas.size() >= 3) {
+            for (int i = espadas.size() - 1; i > 0; i--) {
+                int ref = espadas.get(i).getValor();
+                int indexRef = i;
+                boolean trinca = true;
+
+                if (i >= 2) {
+
+                    for (int c = i - 1; c > i - 3; c--) {
+                        // Nao pode comparar cartas que ja estao em trincas
+                        if (!espadas.get(c).emTrinca) {
+                            ref++;
+                            if (espadas.get(c).getValor() != ref) {
+                                c = i - 3;
+                                trinca = false;
+                            }
                         } else {
-                            primeria.setEmDupla(true);
-                            proxima.setEmDupla(true);
-                            dupla.add(primeria);
-                            dupla.add(proxima);
-                            System.out.println(this.getAID().getLocalName() + "Dupla: ");
-                            System.out.println(primeria.toString());
-                            System.out.println(proxima.toString());
-                        }
-                    }
-                } else {
-                    if (primeria.getValor() == carta.getValor()) {
-                        proxima = mao.remove(mao.indexOf(carta));
-                        i = checaValIqual(primeria, proxima);
-                        if (i < -1) {
-                            Carta interna = mao.remove(i);
-                            primeria.setEmDupla(true);
-                            proxima.setEmDupla(true);
-                            interna.setEmDupla(true);
-                            primeria.setEmTrinca(true);
-                            proxima.setEmTrinca(true);
-                            interna.setEmTrinca(true);
-                            trinca.add(primeria);
-                            trinca.add(proxima);
-                            trinca.add(interna);
-                            System.out.println(this.getAID().getLocalName() + "Trinca: ");
-                            System.out.println(primeria.toString());
-                            System.out.println(proxima.toString());
-                            System.out.println(interna.toString());
-                            qtdTrinca++;
-                        } else {
-                            primeria.setEmDupla(true);
-                            proxima.setEmDupla(true);
-                            dupla.add(primeria);
-                            dupla.add(proxima);
-                            System.out.println(this.getAID().getLocalName() + "Dupla: ");
-                            System.out.println(primeria.toString());
-                            System.out.println(proxima.toString());
+                            c = i - 3;
+                            trinca = false;
                         }
                     }
 
-                }
+                    if (trinca) {
 
+                        for (int a = indexRef; a > indexRef - 3; a--) {
+                            espadas.get(a).setEmTrinca(true);
+                        }
+                        i = i - 2;
+                    }
+                }
             }
         }
-        
-        mao.addAll(trinca);
-        mao.addAll(dupla);
+
+        if (copas.size() >= 3) {
+            for (int i = copas.size() - 1; i > 0; i--) {
+                int ref = copas.get(i).getValor();
+                int indexRef = i;
+                boolean trinca = true;
+
+                if (i >= 2) {
+
+                    for (int c = i - 1; c > i - 3; c--) {
+                        // Nao pode comparar cartas que ja estao em trincas
+                        if (!copas.get(c).emTrinca) {
+                            ref++;
+                            if (copas.get(c).getValor() != ref) {
+                                c = i - 3;
+                                trinca = false;
+                            }
+                        } else {
+                            c = i - 3;
+                            trinca = false;
+                        }
+                    }
+
+                    if (trinca) {
+
+                        for (int a = indexRef; a > indexRef - 3; a--) {
+                            copas.get(a).setEmTrinca(true);
+                        }
+                        i = i - 2;
+                    }
+                }
+            }
+        }
+
+        if (paus.size() >= 3) {
+            for (int i = paus.size() - 1; i > 0; i--) {
+                int ref = paus.get(i).getValor();
+                int indexRef = i;
+                boolean trinca = true;
+
+                if (i >= 2) {
+
+                    for (int c = i - 1; c > i - 3; c--) {
+                        // Nao pode comparar cartas que ja estao em trincas
+                        if (!paus.get(c).emTrinca) {
+                            ref++;
+                            if (paus.get(c).getValor() != ref) {
+                                c = i - 3;
+                                trinca = false;
+                            }
+                        } else {
+                            c = i - 3;
+                            trinca = false;
+                        }
+                    }
+
+                    if (trinca) {
+
+                        for (int a = indexRef; a > indexRef - 3; a--) {
+                            paus.get(a).setEmTrinca(true);
+                        }
+                        i = i - 2;
+                    }
+
+                }
+            }
+        }
+
+        if (ouro.size() >= 3) {
+            for (int i = ouro.size() - 1; i > 0; i--) {
+                int ref = ouro.get(i).getValor();
+                int indexRef = i;
+                boolean trinca = true;
+
+                if (i >= 2) {
+
+                    for (int c = i - 1; c > i - 3; c--) {
+                        // Nao pode comparar cartas que ja estao em trincas
+                        if (!ouro.get(c).emTrinca) {
+                            ref++;
+                            if (ouro.get(c).getValor() != ref) {
+                                c = i - 3;
+                                trinca = false;
+                            }
+                        } else {
+                            c = i - 3;
+                            trinca = false;
+                        }
+                    }
+
+                    if (trinca) {
+
+                        for (int a = indexRef; a > indexRef - 3; a--) {
+                            ouro.get(a).setEmTrinca(true);
+                        }
+                        i = i - 2;
+                    }
+                }
+            }
+        }
     }
 
+    public void checaValorIgual(LinkedList<Carta> aux) {
+        // Passa três vezes a verificação porque cada verificação pode encontrar apenas uma trinca
+        // Passando tres vezes vai poder achar tres trincas (se for o caso)
+        if (aux.size() >= 3) {
+            for (int v = 0; v < 3; v++) {
+                /* Os booleans + o qtd são fundamentais pra achar o padrão de trinca
+                    Os booleans impedem que o mesmo naipe seja validado mais de uma vez
+                    O qtd é fundamental pra dizer "Ok, encontramos 3 naipes diferentes, pode parar"
+                 */
+
+                boolean paus = false;
+                boolean ouro = false;
+                boolean copas = false;
+                boolean espadas = false;
+                int qtd = 0;
+
+                // O index foi criado pra obter a posição do objeto pra depois exatamente ele ser setado como True
+                LinkedList<Integer> index = new LinkedList<Integer>();
+
+                for (int i = 0; i < aux.size(); i++) {
+                    if (aux.get(i).getNaipe() == 1 && !aux.get(i).emTrinca && !espadas && qtd < 3) {
+                        espadas = true;
+                        qtd++;
+                        index.add(i);
+                    } else if (aux.get(i).getNaipe() == 2 && !aux.get(i).emTrinca && !paus && qtd < 3) {
+                        paus = true;
+                        qtd++;
+                        index.add(i);
+                    } else if (aux.get(i).getNaipe() == 3 && !aux.get(i).emTrinca && !copas && qtd < 3) {
+                        copas = true;
+                        qtd++;
+                        index.add(i);
+                    } else if (aux.get(i).getNaipe() == 4 && !aux.get(i).emTrinca && !ouro && qtd < 3) {
+                        ouro = true;
+                        qtd++;
+                        index.add(i);
+                    }
+                }
+
+                if (qtd == 3) {
+                    for (Integer i : index) {
+                        aux.get(i).setEmTrinca(true);
+                    }
+                }
+            }
+        }
+
+    }
+
+    public void checaValorIgual() {
+        LinkedList<Carta> Zero = new LinkedList<Carta>();
+        LinkedList<Carta> Um = new LinkedList<Carta>();
+        LinkedList<Carta> Dois = new LinkedList<Carta>();
+        LinkedList<Carta> Tres = new LinkedList<Carta>();
+        LinkedList<Carta> Quatro = new LinkedList<Carta>();
+        LinkedList<Carta> Cinco = new LinkedList<Carta>();
+        LinkedList<Carta> Seis = new LinkedList<Carta>();
+        LinkedList<Carta> Sete = new LinkedList<Carta>();
+        LinkedList<Carta> Oito = new LinkedList<Carta>();
+        LinkedList<Carta> Nove = new LinkedList<Carta>();
+        LinkedList<Carta> Dez = new LinkedList<Carta>();
+        LinkedList<Carta> Onze = new LinkedList<Carta>();
+        LinkedList<Carta> Doze = new LinkedList<Carta>();
+        LinkedList<Carta> Treze = new LinkedList<Carta>();
+
+        // Separa as cartas agrupando pelo valor dela pra depois verificar se existem naipes diferentes
+        for (Carta c : mao) {
+            switch (c.getValor()) {
+                case 1:
+                    Um.add(c);
+                    break;
+                case 2:
+                    Dois.add(c);
+                    break;
+                case 3:
+                    Tres.add(c);
+                    break;
+                case 4:
+                    Quatro.add(c);
+                    break;
+                case 5:
+                    Cinco.add(c);
+                    break;
+                case 6:
+                    Seis.add(c);
+                    break;
+                case 7:
+                    Sete.add(c);
+                    break;
+                case 8:
+                    Oito.add(c);
+                    break;
+                case 9:
+                    Nove.add(c);
+                    break;
+                case 10:
+                    Dez.add(c);
+                    break;
+                case 11:
+                    Onze.add(c);
+                    break;
+                case 12:
+                    Doze.add(c);
+                    break;
+                default:
+                    Treze.add(c);
+                    break;
+
+            }
+//            if (c.getValor() == 0) {
+//                Zero.add(c);
+//            } else if (c.getValor() == 1) {
+//                Um.add(c);
+//            } else if (c.getValor() == 2) {
+//                Dois.add(c);
+//            } else if (c.getValor() == 3) {
+//                Tres.add(c);
+//            } else if (c.getValor() == 4) {
+//                Quatro.add(c);
+//            } else if (c.getValor() == 5) {
+//                Cinco.add(c);
+//            } else if (c.getValor() == 6) {
+//                Seis.add(c);
+//            } else if (c.getValor() == 7) {
+//                Sete.add(c);
+//            } else if (c.getValor() == 8) {
+//                Oito.add(c);
+//            } else if (c.getValor() == 9) {
+//                Nove.add(c);
+//            } else if (c.getValor() == 10) {
+//                Dez.add(c);
+//            } else if (c.getValor() == 11) {
+//                Onze.add(c);
+//            } else if (c.getValor() == 12) {
+//                Doze.add(c);
+//            } else {
+//                Treze.add(c);
+//            }
+        }
+
+        checaValorIgual(Zero);
+        checaValorIgual(Um);
+        checaValorIgual(Dois);
+        checaValorIgual(Tres);
+        checaValorIgual(Quatro);
+        checaValorIgual(Cinco);
+        checaValorIgual(Seis);
+        checaValorIgual(Sete);
+        checaValorIgual(Oito);
+        checaValorIgual(Nove);
+        checaValorIgual(Dez);
+        checaValorIgual(Onze);
+        checaValorIgual(Doze);
+        checaValorIgual(Treze);
+
+    }
+
+  
     protected void setup() {
 
         //        comportamento senquencial faz ele executar um comportamento de cada vez
@@ -238,42 +446,50 @@ public class Jogador extends Agent {
                     //recebe uma carta do juiz 
                     ACLMessage msg = blockingReceive();
                     if (msg != null) {
-                        ACLMessage reply = msg.createReply();
-                        Carta card = (Carta) msg.getContentObject();
-//                        System.out.println(myAgent.getAID().getLocalName());
-                        System.out.println(myAgent.getAID().getLocalName() +" Carta Recebida " + card.toString());
-                        mao.add(card);
-                        checaTrincas();
-//                        System.out.println(myAgent.getAID().getLocalName()+" Qtd trincas: "+qtdTrinca);
-                        //checa quantidade de trincas
-                        if (qtdTrinca >= 3) {
-                            //manda solicitação de vitoria
-                            reply.setPerformative(ACLMessage.INFORM);
-                            reply.setProtocol("pede_vitoria");
-                            reply.setContentObject(mao);
-                            myAgent.send(reply);
-                            msg = blockingReceive();
-                            if (msg != null) {
-                                String resp = msg.getContent();
-                                if (resp.equals("venceu")) {
-                                    jogoTerminou = true;
-                                }
-                            }
-
+//                       
+                        if (msg.getProtocol().equals("anuncia_fim")) {
+                            String resp = msg.getContent();
+                            jogoTerminou = true;
+                            vencedor = resp;
                         } else {
-                            // devolver a carta menos importante 
-                            reply.setPerformative(ACLMessage.INFORM);
-                            reply.setProtocol("faz_jogada");
-                            card = mao.remove(cartamenosImp());
-                            System.out.println(myAgent.getAID().getLocalName()+" Carta enviada" + card.toString());
-                            card.setEmDupla(false);
-                            card.setEmTrinca(false);
-                            reply.setContentObject(card);
-                            myAgent.send(reply);
+                            ACLMessage reply = msg.createReply();
+                            Carta card = (Carta) msg.getContentObject();
+//                        System.out.println(myAgent.getAID().getLocalName());
+                            System.out.println(myAgent.getAID().getLocalName() + " Carta Recebida " + card.toString());
+                            mao.add(card);
+                            checaTrincas();
+                            System.out.println(myAgent.getAID().getLocalName() + " Qtd trincas: " + qtdTrinca);
+                            //checa quantidade de trincas
+                            if (qtdTrinca >= 3) {
+                                //manda solicitação de vitoria
+                                reply.setPerformative(ACLMessage.INFORM);
+                                reply.setProtocol("pede_vitoria");
+                                reply.setContentObject(mao);
+                                myAgent.send(reply);
+//                            msg = blockingReceive();
+//                            if (msg != null) {
+//                                String resp = msg.getContent();
+//                                
+//                                if (msg.getProtocol().equals("anuncia_fim")) {
+//                                    jogoTerminou = true;
+//                                   
+//                                }
+//                            }
 
+                            } else {
+                                // devolver a carta menos importante 
+                                reply.setPerformative(ACLMessage.INFORM);
+                                reply.setProtocol("faz_jogada");
+                                card = mao.remove(cartamenosImp());
+                                System.out.println(myAgent.getAID().getLocalName() + " Carta enviada" + card.toString());
+                                card.setEmDupla(false);
+                                card.setEmTrinca(false);
+                                reply.setContentObject(card);
+                                myAgent.send(reply);
+
+                            }
                         }
 //                        
-
                     } else {
                         block();
                     }
@@ -283,20 +499,22 @@ public class Jogador extends Agent {
             }
 
             @Override
+
             public boolean done() {
                 return jogoTerminou;
             }
 
             @Override
             public int onEnd() {
+                System.out.println(vencedor + " Venceu ");
 
-                System.out.println(myAgent.getAID().getLocalName() + " Venceu ");
 //                for (Carta carta : mao) {
 //                    System.out.println(carta.toString());
 //                }
                 return 0;
             }
-        });
+        }
+        );
 
     }
 

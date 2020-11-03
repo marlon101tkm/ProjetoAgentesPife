@@ -31,129 +31,30 @@ public class Juiz extends Agent {
     protected LinkedList<Carta> mao = new LinkedList<Carta>();
     String[] nomesJog = {"Jogador1", "Jogador2", "Jogador3", "Jogador4"};
     int i = 0;
+    String nomeVencedor;
     Carta cartaEnviada, cartaRecebida;
     boolean jogoTerminou = false;
     boolean primeiraRodada = true;
     int qtdTrinca;
 
-    protected int checaNipeIqual(Carta c1, Carta c2) {
+    public void checaTrincas() {
+        int qtdEmTrinca = 0;
         for (Carta carta : mao) {
-            if (carta.getNaipe() == c1.getNaipe()) {
-                if (carta.getValor() == c2.getValor() + 1) {
-
-                    return mao.indexOf(carta);
-
-                } else if (carta.getValor() == c1.getValor() - 1) {
-                    return mao.indexOf(carta);
-                }
+            if (carta.emTrinca) {
+                qtdEmTrinca++;
             }
         }
-
-        return -1;
+        qtdTrinca = qtdEmTrinca / 3;
     }
 
-    protected int checaValIqual(Carta c1, Carta c2) {
-        for (Carta carta : mao) {
-            if (carta.getValor() == c1.getValor()) {
-                if (carta.getNaipe() != c1.getNaipe() && carta.getNaipe() != c2.getNaipe()) {
-                    return mao.indexOf(carta);
-                }
-            }
+    public void imprimeMaoVencedora( ){
+        System.out.println("Vencedor: "+ nomeVencedor +"Qtd mao : "+mao.size());
+        for (Carta carta : baralho) {
+            System.out.println(carta.toString());
         }
-
-        return -1;
     }
-
-    protected void checaTrincas() {
-        Collections.sort(mao);
-        LinkedList<Carta> dupla = new LinkedList<Carta>();
-        LinkedList<Carta> trinca = new LinkedList<Carta>();
-        LinkedList<Carta> neutro = new LinkedList<Carta>();
-        int i = 0;
-        Carta primeria, proxima;
-        while (mao.size() == 0) {
-            primeria = mao.removeFirst();
-            for (Carta carta : mao) {
-                if (primeria.getNaipe() == carta.getNaipe()) {
-                    if (primeria.getValor() + 1 == carta.getValor()) {
-                        proxima = mao.remove(mao.indexOf(carta));
-                        i = checaNipeIqual(primeria, proxima);
-                        if (i < -1) {
-                            Carta interna = mao.remove(i);
-                            primeria.setEmDupla(true);
-                            proxima.setEmDupla(true);
-                            interna.setEmDupla(true);
-                            primeria.setEmTrinca(true);
-                            proxima.setEmTrinca(true);
-                            interna.setEmTrinca(true);
-                            trinca.add(primeria);
-                            trinca.add(proxima);
-                            trinca.add(interna);
-                            qtdTrinca++;
-                        } else {
-                            primeria.setEmDupla(true);
-                            proxima.setEmDupla(true);
-                            dupla.add(primeria);
-                            dupla.add(proxima);
-                        }
-
-                    } else if (primeria.getValor() - 1 == carta.getValor()) {
-                        proxima = mao.remove(mao.indexOf(carta));
-                        i = checaNipeIqual(primeria, proxima);
-                        if (i < -1) {
-                            Carta interna = mao.remove(i);
-                            primeria.setEmDupla(true);
-                            proxima.setEmDupla(true);
-                            interna.setEmDupla(true);
-                            primeria.setEmTrinca(true);
-                            proxima.setEmTrinca(true);
-                            interna.setEmTrinca(true);
-                            trinca.add(primeria);
-                            trinca.add(proxima);
-                            trinca.add(interna);
-                            qtdTrinca++;
-                        } else {
-                            primeria.setEmDupla(true);
-                            proxima.setEmDupla(true);
-                            dupla.add(primeria);
-                            dupla.add(proxima);
-                        }
-                    }
-                } else {
-                    if (primeria.getValor() == carta.getValor()) {
-                        proxima = mao.remove(mao.indexOf(carta));
-                        i = checaValIqual(primeria, proxima);
-                        if (i < -1) {
-                            Carta interna = mao.remove(i);
-                            primeria.setEmDupla(true);
-                            proxima.setEmDupla(true);
-                            interna.setEmDupla(true);
-                            primeria.setEmTrinca(true);
-                            proxima.setEmTrinca(true);
-                            interna.setEmTrinca(true);
-                            trinca.add(primeria);
-                            trinca.add(proxima);
-                            trinca.add(interna);
-                            qtdTrinca++;
-                        } else {
-                            primeria.setEmDupla(true);
-                            proxima.setEmDupla(true);
-                            dupla.add(primeria);
-                            dupla.add(proxima);
-                        }
-                    }
-
-                }
-
-            }
-        }
-        mao.addAll(trinca);
-        mao.addAll(dupla);
-
-    }
-
     protected void setup() {
-        
+
 //        comportamento senquencial faz ele executar um comportamento de cada vez
         ComportamentoSequencial comp = new ComportamentoSequencial(this);
         addBehaviour(comp);
@@ -197,9 +98,9 @@ public class Juiz extends Agent {
 
                 try {
                     //quando o baralho acabar pega as cartas da pilha de descarte substitui no baraho e embaralha 
-                    if (baralho.size() == 0) {
+                    if (baralho.size() == 0 || descarte.size() == 0) {
                         baralho.addAll(descarte);
-                        descarte = new LinkedList<Carta>();
+                        descarte.clear();
                         Collections.shuffle(baralho);
                         primeiraRodada = true;
                     }
@@ -208,30 +109,38 @@ public class Juiz extends Agent {
                     if (primeiraRodada) {
 //                        System.out.println(nomesJog[i]);
                         msg.addReceiver(new AID(nomesJog[i], AID.ISLOCALNAME));
+                        msg.setProtocol("envia_carta");
                         cartaEnviada = (Carta) baralho.pop();
-                        System.out.println("Primeira carta enviada" + cartaEnviada.toString()+" para jogador: "+ nomesJog[i]);
+                        System.out.println("Primeira carta enviada" + cartaEnviada.toString() + " para jogador: " + nomesJog[i]);
                         msg.setContentObject(cartaEnviada);
                         myAgent.send(msg);
 
                         msg = blockingReceive();
                         if (msg != null) {
-
                             reply = msg.createReply();
-                            
 //                            recebe a resposta sendo uma jogada comun ou pedido de vitoria
                             if (msg.getProtocol().equalsIgnoreCase("faz_jogada")) {
-
                                 cartaRecebida = (Carta) msg.getContentObject();
-                                System.out.println("Primeira carta Recebida" + cartaRecebida.toString()+" do jogador: "+ nomesJog[i]);
+                                System.out.println("Primeira carta Recebida" + cartaRecebida.toString() + " do jogador: " + nomesJog[i]);
                                 descarte.push(cartaRecebida);
                                 primeiraRodada = false;
                             } else if (msg.getProtocol().equalsIgnoreCase("pede_vitoria")) {
                                 mao = (LinkedList<Carta>) msg.getContentObject();
                                 checaTrincas();
+                                System.err.println(qtdTrinca);
                                 if (qtdTrinca >= 3) {
-                                    reply.setContent("venceu");
+                                    reply.removeReceiver(new AID(nomesJog[i], AID.ISLOCALNAME));
+                                    for (int j = 0; j < 4; j++) {
+                                        reply.addReceiver(new AID(nomesJog[j], AID.ISLOCALNAME));
+                                    }
+                                    
+                                    
+                                    reply.setContent(nomesJog[i]);
+                                    reply.setProtocol("anuncia_fim");
                                     myAgent.send(reply);
                                     jogoTerminou = true;
+                                   nomeVencedor = nomesJog[i];
+                                    
                                 } else {
                                     qtdTrinca = 0;
                                 }
@@ -241,47 +150,55 @@ public class Juiz extends Agent {
                             block();
                         }
 
-                        i++;
                     } else {
                         //nas jogadas subsequentes pega primeiro da pilha de descarte
 //                        System.out.println(nomesJog[i]);
                         msg.addReceiver(new AID(nomesJog[i], AID.ISLOCALNAME));
+                        msg.setProtocol("envia_carta");
                         cartaEnviada = (Carta) descarte.pop();
-                        System.out.println(" Carta Enviada descarte:" + cartaEnviada.toString()+" para jogador: "+ nomesJog[i]);
+                        System.out.println(" Carta Enviada descarte:" + cartaEnviada.toString() + " para jogador: " + nomesJog[i]);
                         msg.setContentObject(cartaEnviada);
                         myAgent.send(msg);
                         msg = blockingReceive();
-                        
                         if (msg != null) {
                             reply = msg.createReply();
 //                            System.out.println(msg.getProtocol());
                             if (msg.getProtocol().equalsIgnoreCase("faz_jogada")) {
                                 cartaRecebida = (Carta) msg.getContentObject();
-                                System.out.println(" Carta Recebida descarte:" + cartaRecebida.toString()+" do jogador: "+ nomesJog[i]);
+                                System.out.println(" Carta Recebida descarte:" + cartaRecebida.toString() + " do jogador: " + nomesJog[i]);
                                 //se a carta recebida for iqual enviada então envia  uma carta do baralho
                                 if (cartaRecebida.equals(cartaEnviada)) {
                                     descarte.push(cartaRecebida);
                                     msg.addReceiver(new AID(nomesJog[i], AID.ISLOCALNAME));
+                                    msg.setProtocol("envia_carta");
                                     cartaEnviada = (Carta) baralho.pop();
-                                    System.out.println(" Carta Enviada baralho:" + cartaEnviada.toString()+" para jogador: "+ nomesJog[i]);
+                                    System.out.println(" Carta Enviada baralho:" + cartaEnviada.toString() + " para jogador: " + nomesJog[i]);
                                     msg.setContentObject(cartaEnviada);
                                     myAgent.send(msg);
                                     msg = blockingReceive();
                                     if (msg != null) {
                                         reply = msg.createReply();
-                                        if (reply.getProtocol().equalsIgnoreCase("faz_jogada")) {
+                                        if (msg.getProtocol().equalsIgnoreCase("faz_jogada")) {
                                             cartaRecebida = (Carta) msg.getContentObject();
-                                            System.out.println(" Carta Recebida baralho:" + cartaRecebida.toString()+" do jogador: "+ nomesJog[i]);
+                                            System.out.println(" Carta Recebida baralho:" + cartaRecebida.toString() + " do jogador: " + nomesJog[i]);
                                             descarte.push(cartaRecebida);
 //                                            ele repete esse codigo  ali embaixo pq ele precisa checar a vitoria a cada envio de cartas
 
-                                        } else if (reply.getProtocol().equalsIgnoreCase("pede_vitoria")) {
-                                            mao = (LinkedList<Carta>) reply.getContentObject();
+                                        } else if (msg.getProtocol().equalsIgnoreCase("pede_vitoria")) {
+                                            mao = (LinkedList<Carta>) msg.getContentObject();
+
                                             checaTrincas();
+                                            System.err.println(qtdTrinca);
                                             if (qtdTrinca >= 3) {
-                                                reply.setContent("venceu");
+                                                reply.removeReceiver(new AID(nomesJog[i], AID.ISLOCALNAME));
+                                                for (int j = 0; j < 4; j++) {
+                                                    reply.addReceiver(new AID(nomesJog[j], AID.ISLOCALNAME));
+                                                }
+                                                reply.setContent(nomesJog[i]);
+                                                reply.setProtocol("anuncia_fim");
                                                 myAgent.send(reply);
                                                 jogoTerminou = true;
+                                                nomeVencedor = nomesJog[i];
                                             } else {
                                                 qtdTrinca = 0;
                                             }
@@ -291,14 +208,26 @@ public class Juiz extends Agent {
                                     }
                                 } else {
                                     descarte.push(cartaRecebida);
+
                                 }
-                            } else if (reply.getProtocol().equalsIgnoreCase("pede_vitoria")) {
-                                mao = (LinkedList<Carta>) reply.getContentObject();
+                            } else if (msg.getProtocol().equalsIgnoreCase("pede_vitoria")) {
+                                mao = (LinkedList<Carta>) msg.getContentObject();
+//                                for (Carta carta : mao) {
+//                                    System.out.println(carta.toString());
+//                                }
                                 checaTrincas();
+                                System.err.println(qtdTrinca);
                                 if (qtdTrinca >= 3) {
-                                    reply.setContent("venceu");
+                                    reply.removeReceiver(new AID(nomesJog[i], AID.ISLOCALNAME));
+                                    for (int j = 0; j < 4; j++) {
+                                        reply.addReceiver(new AID(nomesJog[j], AID.ISLOCALNAME));
+                                    }
+
+                                    reply.setContent(nomesJog[i]);
+                                    reply.setProtocol("anuncia_fim");
                                     myAgent.send(reply);
                                     jogoTerminou = true;
+                                    nomeVencedor = nomesJog[i];
                                 } else {
                                     qtdTrinca = 0;
                                 }
@@ -308,10 +237,11 @@ public class Juiz extends Agent {
                         } else {
                             block();
                         }
-                        i++;
-                        if (i == 4) {
-                            i = 0;
-                        }
+
+                    }
+                    i++;
+                    if (i == 4) {
+                        i = 0;
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -327,7 +257,7 @@ public class Juiz extends Agent {
             @Override
             public int onEnd() {
 
-                System.out.println("Baralho Juiz" + baralho.size());
+              imprimeMaoVencedora();
                 return 0;
             }
         }
