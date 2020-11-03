@@ -32,7 +32,7 @@ public class Jogador extends Agent {
     protected int cartamenosImp() {
         Carta descartar = null;
         for (Carta carta : mao) {
-            if (!carta.isEmTrinca() || !carta.isEmDupla()) {
+            if (!carta.isEmTrinca() && !carta.isEmDupla()) {
                 descartar = carta;
             }
         }
@@ -63,6 +63,8 @@ public class Jogador extends Agent {
 
     }
 
+    
+
     public void checaSequencia() {
         LinkedList<Carta> espadas = new LinkedList<Carta>();
         LinkedList<Carta> paus = new LinkedList<Carta>();
@@ -85,15 +87,6 @@ public class Jogador extends Agent {
                     break;
             }
 
-//            if (c.getNaipe() == 1) {
-//                espadas.add(c);
-//            } else if (c.getNaipe() == 2) {
-//                paus.add(c);
-//            } else if (c.getNaipe() == 3) {
-//                ouro.add(c);
-//            } else {
-//                copas.add(c);
-//            }
         }
 
         Collections.sort(espadas);
@@ -344,38 +337,9 @@ public class Jogador extends Agent {
                     break;
 
             }
-//            if (c.getValor() == 0) {
-//                Zero.add(c);
-//            } else if (c.getValor() == 1) {
-//                Um.add(c);
-//            } else if (c.getValor() == 2) {
-//                Dois.add(c);
-//            } else if (c.getValor() == 3) {
-//                Tres.add(c);
-//            } else if (c.getValor() == 4) {
-//                Quatro.add(c);
-//            } else if (c.getValor() == 5) {
-//                Cinco.add(c);
-//            } else if (c.getValor() == 6) {
-//                Seis.add(c);
-//            } else if (c.getValor() == 7) {
-//                Sete.add(c);
-//            } else if (c.getValor() == 8) {
-//                Oito.add(c);
-//            } else if (c.getValor() == 9) {
-//                Nove.add(c);
-//            } else if (c.getValor() == 10) {
-//                Dez.add(c);
-//            } else if (c.getValor() == 11) {
-//                Onze.add(c);
-//            } else if (c.getValor() == 12) {
-//                Doze.add(c);
-//            } else {
-//                Treze.add(c);
-//            }
         }
 
-        checaValorIgual(Zero);
+//        checaValorIgual(Zero);
         checaValorIgual(Um);
         checaValorIgual(Dois);
         checaValorIgual(Tres);
@@ -392,7 +356,6 @@ public class Jogador extends Agent {
 
     }
 
-  
     protected void setup() {
 
         //        comportamento senquencial faz ele executar um comportamento de cada vez
@@ -439,21 +402,21 @@ public class Jogador extends Agent {
         });
 
         comp.adicionaComp(new Behaviour() {
-
+            Carta card;
             @Override
             public void action() {
                 try {
                     //recebe uma carta do juiz 
                     ACLMessage msg = blockingReceive();
                     if (msg != null) {
-//                       
-                        if (msg.getProtocol().equals("anuncia_fim")) {
+//                        System.out.println(msg.getProtocol());
+                        if (msg.getProtocol().equalsIgnoreCase("anuncia_fim")) {
                             String resp = msg.getContent();
                             jogoTerminou = true;
                             vencedor = resp;
                         } else {
                             ACLMessage reply = msg.createReply();
-                            Carta card = (Carta) msg.getContentObject();
+                            card = (Carta) msg.getContentObject();
 //                        System.out.println(myAgent.getAID().getLocalName());
                             System.out.println(myAgent.getAID().getLocalName() + " Carta Recebida " + card.toString());
                             mao.add(card);
@@ -475,7 +438,6 @@ public class Jogador extends Agent {
 //                                   
 //                                }
 //                            }
-
                             } else {
                                 // devolver a carta menos importante 
                                 reply.setPerformative(ACLMessage.INFORM);

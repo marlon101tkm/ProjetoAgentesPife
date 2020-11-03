@@ -16,7 +16,7 @@ import java.util.Random;
  */
 public class ValidaTrincas {
     boolean ativo = false;
-    LinkedList<Carta> mao = new LinkedList<Carta>();
+    LinkedList<Carta> mao = new LinkedList<>();
     int qtdTrinca = 0;
     boolean jogoTerminou = false;        
 
@@ -301,16 +301,47 @@ public class ValidaTrincas {
         Random random = new Random();              
         
         for (int i=0; i<9; i++){            
-            mao.add(new Carta(random.nextInt(13), random.nextInt(3)));
+            mao.add(new Carta(random.nextInt(13)+1, random.nextInt(4)+1));
         }
                 
     }
     
+    public void checaDupla(){
+        LinkedList<Carta> aux = new LinkedList<>();
+        Carta card;
+        LinkedList<Integer> index = new LinkedList<>();
+        while (mao.size()>0) {
+            
+            if (!mao.getFirst().emDupla) {
+                card = mao.remove();
+                for (Carta c : mao) {
+                    if (card.valor == c.valor) {
+                        if(card.naipe != c.naipe){
+                            index.add(mao.indexOf(c));
+                        }
+                    }
+                }
+                
+                for (int i : index) {
+                    aux.add(mao.remove(i));
+                }
+                aux.add(card);
+            }
+            for (Carta carta : aux) {
+                carta.emDupla = true;
+            }
+        }
+        
+        for (Carta carta : aux) {
+            mao.add(carta);
+        }
+
+    }
     public void imprimeMao(){
         Collections.sort(mao);
         
         for (int i=0; i<9; i++){
-            System.out.println(mao.get(i).getValor()+ " - " + mao.get(i).getNaipe() + " - " + mao.get(i).emTrinca);
+            System.out.println(mao.get(i).getValor()+ " - " + mao.get(i).getNaipe() + " - " + mao.get(i).emDupla);
         }
     }
     
@@ -319,7 +350,8 @@ public class ValidaTrincas {
         
         a.geraMao();
         a.imprimeMao();
-        a.checaTrincas();
+//        a.checaTrincas();
+        a.checaDupla();
         System.out.println("");
         a.imprimeMao();
         
