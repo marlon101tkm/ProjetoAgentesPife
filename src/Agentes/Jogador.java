@@ -1,23 +1,11 @@
 package Agentes;
 
 import comportamentos.ComportamentoSequencial;
-import comportamentos.DistribuirCartas;
-import comportamentos.RecebeCarta;
-import jade.core.AID;
+
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
-import jade.core.behaviours.CyclicBehaviour;
-import jade.core.behaviours.OneShotBehaviour;
-import jade.domain.DFService;
-import jade.domain.FIPAAgentManagement.DFAgentDescription;
-import jade.domain.FIPAAgentManagement.ServiceDescription;
-import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
-import jade.lang.acl.UnreadableException;
-import jade.proto.SubscriptionInitiator;
-import jade.util.Logger;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.LinkedList;
 import objetos.Carta;
 
@@ -25,10 +13,27 @@ public class Jogador extends Agent {
 
     boolean ativo = false;
     protected LinkedList<Carta> mao = new LinkedList<>();
-    int qtdTrinca = 0;
+    int qtdTrinca = 0, grupoTrinca = 1;
     String vencedor = "";
     boolean jogoTerminou = false;
-
+        
+    public void checaTrincas() {        
+        regularizaCartas();
+        checaSequencia();
+        checaValorIgual();
+        checaQtdTrinca();
+        //mostraMao();
+    }    
+    
+    protected void regularizaCartas(){
+        grupoTrinca = 1;
+        for(Carta c:mao){
+            c.setEmDupla(false);
+            c.setEmTrinca(false);
+            c.setGrupoTrinca(0);
+        }
+    }
+    
     protected int cartamenosImp() {
         Carta descartar = null;
         for (Carta carta : mao) {
@@ -47,299 +52,297 @@ public class Jogador extends Agent {
 
         return mao.indexOf(descartar);
     }
-
-    public void checaTrincas() {
-        int qtdEmtrinca = 0;
-        checaSequencia();
-        checaValorIgual();
-        for (Carta carta : mao) {
-            if (carta.emTrinca) {
-                qtdEmtrinca++;
-            }
-        }
-        if (qtdEmtrinca >= 3) {
-            qtdTrinca += qtdEmtrinca / 3;
-        }
-
-    }
-
     
+   protected void checaQtdTrinca(){
+       int cartaTrinca = 0;
+       
+       for (Carta carta : mao) {
+            if (carta.isEmTrinca()) {
+               cartaTrinca++; 
+            }
+        }       
+       if(cartaTrinca>=9){
+           qtdTrinca = 3;
+       }
+       
+   }
 
-    public void checaSequencia() {
+   
+    
+    public void checaSequencia(LinkedList<Carta> aux){
+        // Aux tem que ser maior que 3 cartas, caso contrário, não é uma trinca
+        if(aux.size()>=3){
+            for(int i=aux.size()-1; i>0; i--){
+                int ref = aux.get(i).getValor();
+                int indexRef = i;
+                boolean trinca = true;                                                                
+                
+                if(i>=2){
+                    
+                    for(int c=i-1; c>i-3; c--){
+                        // Nao pode comparar cartas que ja estao em trincas
+                        if(!aux.get(c).isEmTrinca()){
+                            // Ref é o valor referencia que a proxima carta deve ter pra ser considerado sequencial
+                            ref++;                                       
+                            if(aux.get(c).getValor() != ref){
+                                c=i-3;
+                                trinca = false;
+                            }    
+                        } else {
+                            c=i-3;
+                            trinca = false;
+                        }                                      
+                    } 
+
+                    if(trinca){    
+
+                        for(int a=indexRef; a>indexRef-3; a--){                        
+                            aux.get(a).setEmTrinca(true); 
+                            aux.get(a).setEmDupla(false);
+                            aux.get(a).setGrupoTrinca(grupoTrinca);                            
+                        }
+                        i=i-2;
+                        grupoTrinca++;
+                    }                     
+                }         
+            }    
+        }
+        
+        // Aux tem que ser maior que 2 cartas, caso contrário, não é uma dupla
+        if(aux.size()>=2){
+            for(int i=aux.size()-1; i>0; i--){
+                int ref = aux.get(i).getValor();
+                int indexRef = i;
+                boolean trinca = true;                                                                
+                
+                if(i>=2){
+                    
+                    for(int c=i-1; c>i-2; c--){
+                        // Nao pode comparar cartas que ja estao em trincas
+                        if(!aux.get(c).isEmDupla()){
+                            // Ref é o valor referencia que a proxima carta deve ter pra ser considerado sequencial
+                            ref++;                                       
+                            if(aux.get(c).getValor() != ref){
+                                c=i-2;
+                                trinca = false;
+                            }    
+                        } else {
+                            c=i-2;
+                            trinca = false;
+                        }                                      
+                    } 
+
+                    if(trinca){    
+
+                        for(int a=indexRef; a>indexRef-2; a--){                                                    
+                            if(aux.get(a).isEmTrinca()){
+                                break;
+                            } else {
+                                aux.get(i).setEmDupla(true);
+                            }                                                                                            
+                        }
+                        i=i-1;
+                    }                     
+                }         
+            }    
+        }
+    }
+    
+    public void checaSequencia(){
         LinkedList<Carta> espadas = new LinkedList<Carta>();
         LinkedList<Carta> paus = new LinkedList<Carta>();
         LinkedList<Carta> ouro = new LinkedList<Carta>();
         LinkedList<Carta> copas = new LinkedList<Carta>();
-
-        for (Carta c : mao) {
-            switch (c.getNaipe()) {
-                case 1:
-                    espadas.add(c);
-                    break;
-                case 2:
-                    paus.add(c);
-                    break;
-                case 3:
-                    ouro.add(c);
-                    break;
-                default:
-                    copas.add(c);
-                    break;
+        
+        espadas.clear();
+        paus.clear();
+        ouro.clear();
+        copas.clear();
+        
+        for(Carta c : mao){
+            if(c.getNaipe()==1){
+                espadas.add(c);              
+            } else if(c.getNaipe()==2){
+                paus.add(c);                
+            } else if(c.getNaipe()==3){
+                ouro.add(c);                
+            } else if (c.getNaipe()==4) {
+                copas.add(c);                
             }
-
         }
-
+        
         Collections.sort(espadas);
         Collections.sort(paus);
         Collections.sort(ouro);
-        Collections.sort(copas);
-
-        if (espadas.size() >= 3) {
-            for (int i = espadas.size() - 1; i > 0; i--) {
-                int ref = espadas.get(i).getValor();
-                int indexRef = i;
-                boolean trinca = true;
-
-                if (i >= 2) {
-
-                    for (int c = i - 1; c > i - 3; c--) {
-                        // Nao pode comparar cartas que ja estao em trincas
-                        if (!espadas.get(c).emTrinca) {
-                            ref++;
-                            if (espadas.get(c).getValor() != ref) {
-                                c = i - 3;
-                                trinca = false;
-                            }
-                        } else {
-                            c = i - 3;
-                            trinca = false;
-                        }
-                    }
-
-                    if (trinca) {
-
-                        for (int a = indexRef; a > indexRef - 3; a--) {
-                            espadas.get(a).setEmTrinca(true);
-                        }
-                        i = i - 2;
-                    }
-                }
-            }
-        }
-
-        if (copas.size() >= 3) {
-            for (int i = copas.size() - 1; i > 0; i--) {
-                int ref = copas.get(i).getValor();
-                int indexRef = i;
-                boolean trinca = true;
-
-                if (i >= 2) {
-
-                    for (int c = i - 1; c > i - 3; c--) {
-                        // Nao pode comparar cartas que ja estao em trincas
-                        if (!copas.get(c).emTrinca) {
-                            ref++;
-                            if (copas.get(c).getValor() != ref) {
-                                c = i - 3;
-                                trinca = false;
-                            }
-                        } else {
-                            c = i - 3;
-                            trinca = false;
-                        }
-                    }
-
-                    if (trinca) {
-
-                        for (int a = indexRef; a > indexRef - 3; a--) {
-                            copas.get(a).setEmTrinca(true);
-                        }
-                        i = i - 2;
-                    }
-                }
-            }
-        }
-
-        if (paus.size() >= 3) {
-            for (int i = paus.size() - 1; i > 0; i--) {
-                int ref = paus.get(i).getValor();
-                int indexRef = i;
-                boolean trinca = true;
-
-                if (i >= 2) {
-
-                    for (int c = i - 1; c > i - 3; c--) {
-                        // Nao pode comparar cartas que ja estao em trincas
-                        if (!paus.get(c).emTrinca) {
-                            ref++;
-                            if (paus.get(c).getValor() != ref) {
-                                c = i - 3;
-                                trinca = false;
-                            }
-                        } else {
-                            c = i - 3;
-                            trinca = false;
-                        }
-                    }
-
-                    if (trinca) {
-
-                        for (int a = indexRef; a > indexRef - 3; a--) {
-                            paus.get(a).setEmTrinca(true);
-                        }
-                        i = i - 2;
-                    }
-
-                }
-            }
-        }
-
-        if (ouro.size() >= 3) {
-            for (int i = ouro.size() - 1; i > 0; i--) {
-                int ref = ouro.get(i).getValor();
-                int indexRef = i;
-                boolean trinca = true;
-
-                if (i >= 2) {
-
-                    for (int c = i - 1; c > i - 3; c--) {
-                        // Nao pode comparar cartas que ja estao em trincas
-                        if (!ouro.get(c).emTrinca) {
-                            ref++;
-                            if (ouro.get(c).getValor() != ref) {
-                                c = i - 3;
-                                trinca = false;
-                            }
-                        } else {
-                            c = i - 3;
-                            trinca = false;
-                        }
-                    }
-
-                    if (trinca) {
-
-                        for (int a = indexRef; a > indexRef - 3; a--) {
-                            ouro.get(a).setEmTrinca(true);
-                        }
-                        i = i - 2;
-                    }
-                }
-            }
+        Collections.sort(copas);                               
+        
+        checaSequencia(espadas);
+        checaSequencia(paus);
+        checaSequencia(ouro);
+        checaSequencia(copas);
+    }
+    
+    protected void mostraMao(){
+        for(Carta c : mao){            
+            System.out.println(c.getValor() + " - " + c.getNaipe() + " - " + c.isEmTrinca() + " - " + c.isEmDupla());
         }
     }
-
-    public void checaValorIgual(LinkedList<Carta> aux) {
-        // Passa três vezes a verificação porque cada verificação pode encontrar apenas uma trinca
-        // Passando tres vezes vai poder achar tres trincas (se for o caso)
-        if (aux.size() >= 3) {
-            for (int v = 0; v < 3; v++) {
+    
+    public void checaValorIgual(LinkedList<Carta> aux){
+        //Precisa ser maior que 3 pra poder achar uma trinca
+        if(aux.size()>=3){
+            // Passa três vezes a verificação porque cada verificação pode encontrar apenas uma trinca
+            // Passando tres vezes vai poder achar tres trincas (se for o caso)
+            for(int v=0; v<3; v++){
                 /* Os booleans + o qtd são fundamentais pra achar o padrão de trinca
                     Os booleans impedem que o mesmo naipe seja validado mais de uma vez
                     O qtd é fundamental pra dizer "Ok, encontramos 3 naipes diferentes, pode parar"
-                 */
-
+                */
+                
                 boolean paus = false;
                 boolean ouro = false;
                 boolean copas = false;
                 boolean espadas = false;
-                int qtd = 0;
-
+                int qtd=0;
+                
                 // O index foi criado pra obter a posição do objeto pra depois exatamente ele ser setado como True
-                LinkedList<Integer> index = new LinkedList<Integer>();
+                LinkedList<Integer> index = new LinkedList<Integer>();                                              
 
-                for (int i = 0; i < aux.size(); i++) {
-                    if (aux.get(i).getNaipe() == 1 && !aux.get(i).emTrinca && !espadas && qtd < 3) {
-                        espadas = true;
+                for(int i=0; i<aux.size(); i++){
+                    if(aux.get(i).getNaipe()==0 && !aux.get(i).isEmTrinca() && !espadas && qtd<3){
+                        espadas=true;
                         qtd++;
                         index.add(i);
-                    } else if (aux.get(i).getNaipe() == 2 && !aux.get(i).emTrinca && !paus && qtd < 3) {
-                        paus = true;
+                    } else if(aux.get(i).getNaipe()==1 && !aux.get(i).isEmTrinca() && !paus && qtd<3){
+                        paus=true;
                         qtd++;
                         index.add(i);
-                    } else if (aux.get(i).getNaipe() == 3 && !aux.get(i).emTrinca && !copas && qtd < 3) {
-                        copas = true;
+                    } else if(aux.get(i).getNaipe()==2 && !aux.get(i).isEmTrinca() && !copas && qtd<3){
+                        copas=true;
                         qtd++;
                         index.add(i);
-                    } else if (aux.get(i).getNaipe() == 4 && !aux.get(i).emTrinca && !ouro && qtd < 3) {
-                        ouro = true;
+                    } else if(aux.get(i).getNaipe()==3 && !aux.get(i).isEmTrinca() && !ouro && qtd<3){
+                        ouro=true;
                         qtd++;
                         index.add(i);
-                    }
+                    }                     
                 }
 
-                if (qtd == 3) {
-                    for (Integer i : index) {
+                if(qtd==3){
+                    for(Integer i : index){
                         aux.get(i).setEmTrinca(true);
+                        aux.get(i).setEmDupla(false);
+                        aux.get(i).setGrupoTrinca(grupoTrinca);
                     }
+                    
+                    grupoTrinca++;
+                }                
+            }            
+        } 
+        
+        // Precisa ser maior que 2 para poder achar uma dupla
+        if(aux.size()>=2){
+            // Passa 6 vezes a verificação porque cada verificação pode encontrar apenas uma dupla
+            // Passando 6 vezes vai poder achar 6 duplas (se for o caso)
+            for(int v=0; v<2; v++){
+                /* Os booleans + o qtd são fundamentais pra achar o padrão de trinca
+                    Os booleans impedem que o mesmo naipe seja validado mais de uma vez
+                    O qtd é fundamental pra dizer "Ok, encontramos 3 naipes diferentes, pode parar"
+                */
+                
+                boolean paus = false;
+                boolean ouro = false;
+                boolean copas = false;
+                boolean espadas = false;
+                int qtd=0;
+                
+                // O index foi criado pra obter a posição do objeto pra depois exatamente ele ser setado como True
+                LinkedList<Integer> index = new LinkedList<Integer>();                                              
+
+                for(int i=0; i<aux.size(); i++){
+                    if(aux.get(i).getNaipe()==0 && !aux.get(i).isEmTrinca() && !espadas && qtd<2 && !aux.get(i).isEmDupla()){
+                        espadas=true;
+                        qtd++;
+                        index.add(i);
+                    } else if(aux.get(i).getNaipe()==1 && !aux.get(i).isEmTrinca() && !paus && qtd<2 && !aux.get(i).isEmDupla()){
+                        paus=true;
+                        qtd++;
+                        index.add(i);
+                    } else if(aux.get(i).getNaipe()==2 && !aux.get(i).isEmTrinca() && !copas && qtd<2 && !aux.get(i).isEmDupla()){
+                        copas=true;
+                        qtd++;
+                        index.add(i);
+                    } else if(aux.get(i).getNaipe()==3 && !aux.get(i).isEmTrinca() && !ouro && qtd<2 && !aux.get(i).isEmDupla()){
+                        ouro=true;
+                        qtd++;
+                        index.add(i);
+                    }                     
                 }
-            }
-        }
 
+                if(qtd==2){
+                    for(Integer i : index){
+                        if(aux.get(i).isEmTrinca()){
+                            break;
+                        } else {
+                            aux.get(i).setEmDupla(true);
+                        }                        
+                    }
+                }                
+            }            
+        } 
+        
     }
-
-    public void checaValorIgual() {
-        LinkedList<Carta> Zero = new LinkedList<Carta>();
-        LinkedList<Carta> Um = new LinkedList<Carta>();
-        LinkedList<Carta> Dois = new LinkedList<Carta>();
-        LinkedList<Carta> Tres = new LinkedList<Carta>();
-        LinkedList<Carta> Quatro = new LinkedList<Carta>();
-        LinkedList<Carta> Cinco = new LinkedList<Carta>();
-        LinkedList<Carta> Seis = new LinkedList<Carta>();
-        LinkedList<Carta> Sete = new LinkedList<Carta>();
-        LinkedList<Carta> Oito = new LinkedList<Carta>();
-        LinkedList<Carta> Nove = new LinkedList<Carta>();
-        LinkedList<Carta> Dez = new LinkedList<Carta>();
-        LinkedList<Carta> Onze = new LinkedList<Carta>();
-        LinkedList<Carta> Doze = new LinkedList<Carta>();
-        LinkedList<Carta> Treze = new LinkedList<Carta>();
-
-        // Separa as cartas agrupando pelo valor dela pra depois verificar se existem naipes diferentes
-        for (Carta c : mao) {
-            switch (c.getValor()) {
-                case 1:
-                    Um.add(c);
-                    break;
-                case 2:
-                    Dois.add(c);
-                    break;
-                case 3:
-                    Tres.add(c);
-                    break;
-                case 4:
-                    Quatro.add(c);
-                    break;
-                case 5:
-                    Cinco.add(c);
-                    break;
-                case 6:
-                    Seis.add(c);
-                    break;
-                case 7:
-                    Sete.add(c);
-                    break;
-                case 8:
-                    Oito.add(c);
-                    break;
-                case 9:
-                    Nove.add(c);
-                    break;
-                case 10:
-                    Dez.add(c);
-                    break;
-                case 11:
-                    Onze.add(c);
-                    break;
-                case 12:
-                    Doze.add(c);
-                    break;
-                default:
-                    Treze.add(c);
-                    break;
-
+    
+    public void checaValorIgual(){
+       LinkedList<Carta> Zero = new LinkedList<Carta>();
+       LinkedList<Carta> Um = new LinkedList<Carta>();
+       LinkedList<Carta> Dois = new LinkedList<Carta>();
+       LinkedList<Carta> Tres = new LinkedList<Carta>();
+       LinkedList<Carta> Quatro = new LinkedList<Carta>();
+       LinkedList<Carta> Cinco = new LinkedList<Carta>();
+       LinkedList<Carta> Seis = new LinkedList<Carta>();
+       LinkedList<Carta> Sete = new LinkedList<Carta>();
+       LinkedList<Carta> Oito = new LinkedList<Carta>();
+       LinkedList<Carta> Nove = new LinkedList<Carta>();
+       LinkedList<Carta> Dez = new LinkedList<Carta>();
+       LinkedList<Carta> Onze = new LinkedList<Carta>();
+       LinkedList<Carta> Doze = new LinkedList<Carta>();
+       LinkedList<Carta> Treze = new LinkedList<Carta>();
+    
+       // Separa as cartas agrupando pelo valor dela pra depois verificar se existem naipes diferentes
+       for(Carta c : mao){
+            if(c.getValor() == 0){
+                Zero.add(c);              
+            } else if(c.getValor()==1){
+                Um.add(c);                
+            } else if(c.getValor()==2){
+                Dois.add(c);                
+            }  else if(c.getValor()==3){
+                Tres.add(c);                
+            }  else if(c.getValor()==4){
+                Quatro.add(c);                
+            }  else if(c.getValor()==5){
+                Cinco.add(c);                
+            }  else if(c.getValor()==6){
+                Seis.add(c);                
+            }  else if(c.getValor()==7){
+                Sete.add(c);                
+            }  else if(c.getValor()==8){
+                Oito.add(c);                
+            }  else if(c.getValor()==9){
+                Nove.add(c);                
+            }  else if(c.getValor()==10){
+                Dez.add(c);                
+            }  else if(c.getValor()==11){
+                Onze.add(c);                
+            }  else if(c.getValor()==12){
+                Doze.add(c);                
+            } else {
+                Treze.add(c);                
             }
         }
-
-//        checaValorIgual(Zero);
+        
+        checaValorIgual(Zero);
         checaValorIgual(Um);
         checaValorIgual(Dois);
         checaValorIgual(Tres);
@@ -352,8 +355,8 @@ public class Jogador extends Agent {
         checaValorIgual(Dez);
         checaValorIgual(Onze);
         checaValorIgual(Doze);
-        checaValorIgual(Treze);
-
+        checaValorIgual(Treze);                                  
+        
     }
 
     protected void setup() {

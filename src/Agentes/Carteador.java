@@ -1,33 +1,18 @@
 package Agentes;
 
 import comportamentos.ComportamentoSequencial;
-import comportamentos.DistribuirCartas;
-import comportamentos.EnviaBaralho;
+
+
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
-import jade.core.behaviours.CyclicBehaviour;
-import jade.core.behaviours.OneShotBehaviour;
-import jade.core.behaviours.TickerBehaviour;
-
-import jade.domain.DFService;
-import jade.domain.FIPAAgentManagement.DFAgentDescription;
-import jade.domain.FIPAAgentManagement.ServiceDescription;
-import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
-import jade.proto.SubscriptionInitiator;
-import jade.util.leap.ArrayList;
-import java.io.IOException;
-import java.util.ArrayDeque;
-import java.util.Collection;
+import java.net.URL;
 
 import java.util.Collections;
 
 import java.util.LinkedList;
-import java.util.List;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import javax.swing.ImageIcon;
 import objetos.Carta;
 
 public class Carteador extends Agent {
@@ -42,16 +27,24 @@ public class Carteador extends Agent {
     int contJog = 0;
 
     public void geraCartas() {
-
+         ClassLoader cldr = this.getClass().getClassLoader();
+        Carta card;
         for (int i = 1; i < 5; i++) {
             for (int j = 1; j < 14; j++) {
-                baralho.add(new Carta(j, i));
+                card = new Carta(j, i);
+                String imagePath = "imagens/" + j
+                        + i + ".gif";
+//                System.out.println(imagePath);
+                URL imageURL = cldr.getResource(imagePath);
+                ImageIcon img = new ImageIcon(imageURL);
+                card.imagem = img;
+                baralho.add(card);
             }
         }
 //        for (Carta carta : baralho) {
 //            System.out.println(carta.toString());
 //        }
-          
+
         Collections.shuffle(baralho);
     }
 
@@ -62,23 +55,22 @@ public class Carteador extends Agent {
         //        comportamento senquencial faz ele executar um comportamento de cada vez
         ComportamentoSequencial comp = new ComportamentoSequencial(this);
         addBehaviour(comp);
-        
-        
+
         //distribui as cartas pros jogadores 
         comp.adicionaComp(new Behaviour() {
 
             @Override
             public void action() {
                 try {
-                    
+
                     ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
                     msg.addReceiver(new AID(nomesJog[i], AID.ISLOCALNAME));
-                    msg.setContentObject((Carta) baralho.pop());     
+                    msg.setContentObject((Carta) baralho.pop());
                     myAgent.send(msg);
                     ACLMessage reply = blockingReceive();
                     if (reply != null) {
                         qtdCartas[i] = Integer.parseInt(reply.getContent());
-                           
+
                     } else {
                         block();
                     }

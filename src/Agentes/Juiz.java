@@ -1,27 +1,15 @@
 package Agentes;
 
 import comportamentos.ComportamentoSequencial;
-import comportamentos.DistribuirCartas;
-import comportamentos.RecebeBaralho;
+
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
-import jade.core.behaviours.OneShotBehaviour;
-import jade.domain.DFService;
-import jade.domain.FIPAAgentManagement.DFAgentDescription;
-import jade.domain.FIPAAgentManagement.ServiceDescription;
-import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
-import jade.proto.SubscriptionInitiator;
-import jade.util.leap.ArrayList;
-import java.io.Serializable;
-import java.util.ArrayDeque;
 import java.util.Collections;
-import java.util.Deque;
 import java.util.LinkedList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.Random;
 import objetos.Carta;
 
 public class Juiz extends Agent {
@@ -44,14 +32,48 @@ public class Juiz extends Agent {
                 qtdEmTrinca++;
             }
         }
-        qtdTrinca += qtdEmTrinca / 3;
-    }
+        qtdTrinca = qtdEmTrinca / 3;
+    }        
 
     public void imprimeMaoVencedora() {
-        System.out.println("Vencedor: " + nomeVencedor + "Qtd mao : " + mao.size());
-        for (Carta carta : baralho) {
-            System.out.println(carta.toString());
+        LinkedList<Carta> trincaUm = new LinkedList<Carta>();
+        LinkedList<Carta> trincaDois = new LinkedList<Carta>();
+        LinkedList<Carta> trincaTres = new LinkedList<Carta>();
+        LinkedList<Carta> aux = new LinkedList<Carta>();
+        Carta resto = null;
+        
+        trincaUm.clear();
+        trincaDois.clear();
+        trincaTres.clear();        
+        
+        System.out.println("Vencedor: " + nomeVencedor);
+        
+        for (Carta carta : mao) {
+            if(carta.getGrupoTrinca()==1){
+                trincaUm.add(carta);
+            } else if(carta.getGrupoTrinca()==2){
+                trincaDois.add(carta);
+            } else if(carta.getGrupoTrinca()==3){
+                trincaTres.add(carta);
+            } else {
+                resto = carta;
+            }
         }
+        
+        Collections.sort(trincaUm);
+        Collections.sort(trincaDois);
+        Collections.sort(trincaTres);
+        
+        aux.addAll(trincaUm);
+        aux.addAll(trincaDois);
+        aux.addAll(trincaTres);
+        aux.add(resto);
+        
+        for(Carta c : aux){
+            System.out.println(c.getValor() + " - " + c.getNaipe() + " - " + c.getGrupoTrinca());
+        }
+        
+        
     }
 
     protected void setup() {
@@ -152,7 +174,14 @@ public class Juiz extends Agent {
 //                        System.out.println(nomesJog[i]);
                         msg.addReceiver(new AID(nomesJog[i], AID.ISLOCALNAME));
                         msg.setProtocol("envia_carta");
-                        cartaEnviada = (Carta) descarte.pop();
+                        
+                        Random r = new Random();                                                
+                        if(r.nextInt(100)%2==0 && descarte.size() > 0){
+                            cartaEnviada = (Carta) descarte.pop();
+                        } else {
+                            cartaEnviada = (Carta) baralho.pop();
+                        }
+
                         System.out.println(" Carta Enviada descarte:" + cartaEnviada.toString() + " para jogador: " + nomesJog[i]);
                         msg.setContentObject(cartaEnviada);
                         myAgent.send(msg);
