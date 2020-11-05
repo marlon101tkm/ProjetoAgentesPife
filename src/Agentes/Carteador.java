@@ -55,7 +55,10 @@ public class Carteador extends Agent {
         //        comportamento senquencial faz ele executar um comportamento de cada vez
         ComportamentoSequencial comp = new ComportamentoSequencial(this);
         addBehaviour(comp);
-
+        
+        
+        
+        
         //distribui as cartas pros jogadores 
         comp.adicionaComp(new Behaviour() {
 

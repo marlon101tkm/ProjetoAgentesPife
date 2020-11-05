@@ -81,10 +81,7 @@ public class Carta implements Serializable,Comparable<Carta> {
         this.grupoTrinca = grupoTrinca;
     }
 
-    public Object get(int i) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
+  
    
     public void draw(Graphics g, Component c, int x , int y) {
         imagem.paintIcon(c, g, x, y);

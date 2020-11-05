@@ -5,44 +5,37 @@
  */
 package objetos;
 
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 /**
  *
  * @author Win10
  */
-public class TelaJogo extends javax.swing.JFrame {
+public class TelaJogo extends javax.swing.JFrame{
 
     /**
      * Creates new form TelaJogo
      */
     public TelaJogo() {
         initComponents();
+        
+     
     }
 
-    public JPanel getInfoPartida() {
-        return InfoPartida;
+    public JLabel getlVencedor() {
+        return lVencedor;
     }
 
-    public JPanel getCentroMesa() {
-        return centroMesa;
+    public JLabel getNomeJog() {
+        return nomeJog;
     }
 
-    public JPanel getPanelJog1() {
-        return panelJog1;
+    public JLabel getJogAtual() {
+        return jogAtual;
     }
 
-    public JPanel getPanelJog2() {
-        return panelJog2;
-    }
-
-    public JPanel getPanelJog3() {
-        return panelJog3;
-    }
-
-    public JPanel getPanelJog4() {
-        return panelJog4;
-    }
+    
     
     
     
@@ -55,135 +48,50 @@ public class TelaJogo extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        InfoPartida = new javax.swing.JPanel();
-        panelJog1 = new javax.swing.JPanel();
-        panelJog2 = new javax.swing.JPanel();
-        panelJog3 = new javax.swing.JPanel();
-        panelJog4 = new javax.swing.JPanel();
-        centroMesa = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
+        jogAtual = new javax.swing.JLabel();
+        lVencedor = new javax.swing.JLabel();
+        nomeJog = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        InfoPartida.setBorder(javax.swing.BorderFactory.createTitledBorder("InfoPartida"));
+        jLabel1.setText("Jogador Atual:");
 
-        javax.swing.GroupLayout InfoPartidaLayout = new javax.swing.GroupLayout(InfoPartida);
-        InfoPartida.setLayout(InfoPartidaLayout);
-        InfoPartidaLayout.setHorizontalGroup(
-            InfoPartidaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 0, Short.MAX_VALUE)
-        );
-        InfoPartidaLayout.setVerticalGroup(
-            InfoPartidaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 88, Short.MAX_VALUE)
-        );
+        jogAtual.setText("jLabel2");
 
-        panelJog1.setBorder(javax.swing.BorderFactory.createTitledBorder("Jogador 1"));
+        lVencedor.setText("Vencedor:");
 
-        javax.swing.GroupLayout panelJog1Layout = new javax.swing.GroupLayout(panelJog1);
-        panelJog1.setLayout(panelJog1Layout);
-        panelJog1Layout.setHorizontalGroup(
-            panelJog1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 736, Short.MAX_VALUE)
-        );
-        panelJog1Layout.setVerticalGroup(
-            panelJog1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 90, Short.MAX_VALUE)
-        );
-
-        panelJog2.setBorder(javax.swing.BorderFactory.createTitledBorder("Jogador 2"));
-
-        javax.swing.GroupLayout panelJog2Layout = new javax.swing.GroupLayout(panelJog2);
-        panelJog2.setLayout(panelJog2Layout);
-        panelJog2Layout.setHorizontalGroup(
-            panelJog2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 122, Short.MAX_VALUE)
-        );
-        panelJog2Layout.setVerticalGroup(
-            panelJog2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 438, Short.MAX_VALUE)
-        );
-
-        panelJog3.setBorder(javax.swing.BorderFactory.createTitledBorder("Jogador 3"));
-        panelJog3.setToolTipText("");
-
-        javax.swing.GroupLayout panelJog3Layout = new javax.swing.GroupLayout(panelJog3);
-        panelJog3.setLayout(panelJog3Layout);
-        panelJog3Layout.setHorizontalGroup(
-            panelJog3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 676, Short.MAX_VALUE)
-        );
-        panelJog3Layout.setVerticalGroup(
-            panelJog3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 79, Short.MAX_VALUE)
-        );
-
-        panelJog4.setBorder(javax.swing.BorderFactory.createTitledBorder("Jogador 4"));
-
-        javax.swing.GroupLayout panelJog4Layout = new javax.swing.GroupLayout(panelJog4);
-        panelJog4.setLayout(panelJog4Layout);
-        panelJog4Layout.setHorizontalGroup(
-            panelJog4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 101, Short.MAX_VALUE)
-        );
-        panelJog4Layout.setVerticalGroup(
-            panelJog4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 414, Short.MAX_VALUE)
-        );
-
-        centroMesa.setBorder(javax.swing.BorderFactory.createTitledBorder("Centro da Mesa"));
-
-        javax.swing.GroupLayout centroMesaLayout = new javax.swing.GroupLayout(centroMesa);
-        centroMesa.setLayout(centroMesaLayout);
-        centroMesaLayout.setHorizontalGroup(
-            centroMesaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 365, Short.MAX_VALUE)
-        );
-        centroMesaLayout.setVerticalGroup(
-            centroMesaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 348, Short.MAX_VALUE)
-        );
+        nomeJog.setText("jLabel2");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(InfoPartida, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(layout.createSequentialGroup()
-                .addGap(21, 21, 21)
-                .addComponent(panelJog4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(centroMesa, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(100, 100, 100)
-                .addComponent(panelJog2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-            .addGroup(layout.createSequentialGroup()
+                .addGap(43, 43, 43)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(84, 84, 84)
-                        .addComponent(panelJog3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(lVencedor)
+                        .addGap(37, 37, 37)
+                        .addComponent(nomeJog))
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(47, 47, 47)
-                        .addComponent(panelJog1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(0, 51, Short.MAX_VALUE))
+                        .addComponent(jLabel1)
+                        .addGap(18, 18, 18)
+                        .addComponent(jogAtual)))
+                .addContainerGap(179, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(16, 16, 16)
-                .addComponent(InfoPartida, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(27, 27, 27)
-                .addComponent(panelJog1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(99, 99, 99)
-                        .addComponent(panelJog2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 44, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(centroMesa, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(panelJog4, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(32, 32, 32)))
-                .addComponent(panelJog3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(25, 25, 25)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel1)
+                    .addComponent(jogAtual))
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lVencedor)
+                    .addComponent(nomeJog))
+                .addContainerGap(291, Short.MAX_VALUE))
         );
 
         pack();
@@ -215,6 +123,9 @@ public class TelaJogo extends javax.swing.JFrame {
             java.util.logging.Logger.getLogger(TelaJogo.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
@@ -225,11 +136,9 @@ public class TelaJogo extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JPanel InfoPartida;
-    private javax.swing.JPanel centroMesa;
-    private javax.swing.JPanel panelJog1;
-    private javax.swing.JPanel panelJog2;
-    private javax.swing.JPanel panelJog3;
-    private javax.swing.JPanel panelJog4;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jogAtual;
+    private javax.swing.JLabel lVencedor;
+    private javax.swing.JLabel nomeJog;
     // End of variables declaration//GEN-END:variables
 }
